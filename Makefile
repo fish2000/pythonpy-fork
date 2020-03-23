@@ -19,7 +19,7 @@ clean-pyc:
 	find $(PROJECT_BASE) -name \*.pyc -print -delete
 
 clean-build-artifacts:
-	rm -rf build dist python_$(PROJECT_NAME).egg-info
+	rm -rf build dist $(PROJECT_NAME)_fork.egg-info
 
 clean-test-artifacts: clean-pyc
 	rm -rf  $(PROJECT_ROOT)/.pytest_cache \
@@ -56,7 +56,7 @@ pytype:
 	pytype --config pytype.cfg --verbosity=2
 
 pytest:
-	python -m pytest -p clu.testing.pytest
+	PYTHONPATH="." python -m pytest
 
 nox:
 	nox --report $(PROJECT_BASE)/.noxresults.json
