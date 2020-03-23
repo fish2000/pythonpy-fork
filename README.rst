@@ -3,7 +3,7 @@ Installation
 
 ::
 
-  pip install pythonpy
+  pip install pythonpy-fork
 
 ::
 
@@ -166,9 +166,9 @@ Count words beginning with each letter
 
 ::
 
-For more examples, check out the `wiki <http://github.com/Russell91/pythonpy/wiki>`__.
+For more examples, check out the `wiki <http://github.com/fish2000/pythonpy-fork/wiki>`__.
 
-Pythonpy also supports ipython style tab completion, which you can enable as follows
+Pythonpy also supports `ipython`-style tab completion, which you can enable as follows:
 
 ::
 
