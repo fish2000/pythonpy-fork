@@ -23,8 +23,7 @@ def prior(input):
 
 def lazy_imports(*args):
     query = ' '.join([x for x in args if x])
-    regex = re.compile("([a-zA-Z_][a-zA-Z0-9_]*)\.?")
-    matches = regex.findall(query)
+    matches = lazy_imports.rgx.findall(query)
     for raw_module_name in matches:
         if re.match('np(\..*)?$', raw_module_name):
             module_name = re.sub('^np', 'numpy', raw_module_name)
@@ -38,6 +37,8 @@ def lazy_imports(*args):
         except ImportError as exc:
             assert exc
             pass
+
+lazy_imports.rgx = re.compile("([a-zA-Z_][a-zA-Z0-9_]*)\.?")
 
 def complete_all(prefix, completion_args):
     lazy_imports(prefix, completion_args['c_arg'])

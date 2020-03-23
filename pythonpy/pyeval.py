@@ -63,7 +63,9 @@ def lazy_imports(*args):
     import_matches(query)
 
 def current_list(input):
-    return re.split(r'[^a-zA-Z0-9_\.]', input)
+    return current_list.rgx.split(input)
+
+current_list.rgx = re.compile(r'[^a-zA-Z0-9_\.]')
 
 def inspect_source(obj):
     import pydoc
@@ -127,7 +129,7 @@ def redirect(args):
         except SystemExit as exit:
             raise TypeError("[ERROR] in cluval execution") from exit
         
-        except Exception as exc:
+        except BaseException as exc:
             import traceback
             pyheader = 'pythonpy/pyeval.py'
             exprheader = 'File "<string>"'
@@ -145,6 +147,18 @@ def redirect(args):
             exc.code = 1
             raise exc
 
+def print_ok(string):
+    try:
+        print(string)
+    except UnicodeEncodeError:
+        print(string.encode('UTF-8'))
+        
+def safe_eval(code, x):
+    try:
+        return eval(code)
+    except:
+        return None
+
 def pyeval(argv=None):
     """ Evaluate a Python expression from a set of CLI arguments. """
     
@@ -160,10 +174,10 @@ def pyeval(argv=None):
         
         if args.json_input:
             
-            def loads(str_):
+            def loads(string):
                 try:
-                    return json.loads(str_.rstrip())
-                except Exception as exc:
+                    return json.loads(string.rstrip())
+                except BaseException as exc:
                     if args.ignore_exceptions:
                         pass
                     else:
@@ -208,12 +222,6 @@ def pyeval(argv=None):
         if args.pre_cmd:
             exec(args.pre_cmd)
         
-        def safe_eval(text, x):
-            try:
-                return eval(text)
-            except:
-                return None
-        
         if args.lines_of_stdin:
             
             if args.ignore_exceptions:
@@ -250,17 +258,11 @@ def pyeval(argv=None):
             for x in result:
                 formatted = format(x)
                 if formatted is not None:
-                    try:
-                        print(formatted)
-                    except UnicodeEncodeError:
-                        print(formatted.encode('utf-8'))
+                    print_ok(formatted)
         else:
             formatted = format(result)
             if formatted is not None:
-                try:
-                    print(formatted)
-                except UnicodeEncodeError:
-                    print(formatted.encode('utf-8'))
+                print_ok(formatted)
         
         if args.post_cmd:
             exec(args.post_cmd)
