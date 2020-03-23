@@ -1,19 +1,37 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
 
-from collections import defaultdict
-
+import collections
 import rlcompleter
 import re, sys
+    
+try:
+    # Python >= 3.3
+    from importlib.machinery import all_suffixes
+    _suffixes = all_suffixes()
+except ImportError:
+    from imp import get_suffixes
+    _suffixes = [ s[0] for s in get_suffixes() ]
+
+# RE for the ipython %run command (python + ipython scripts)
+from pythonpy.pyeval import alias_res
+    
+# Regular expression for the python import statement
+import_re = re.compile(r'(?P<name>[a-zA-Z_][a-zA-Z0-9_]*?)'
+                       r'(?P<package>[/\\]__init__)?'
+                       r'(?P<suffix>%s)$' %
+                       r'|'.join(re.escape(s) for s in _suffixes))
 
 def current_raw(input):
     if len(input[-1]) > 0 and input[-1][0] in '"\'':
-        return input[-1][1:] 
+        return input[-1][1:]
     return input[-1]
 
 def current_list(input):
-    return re.split(r'[^a-zA-Z0-9_\.]', current_raw(input))
+    return current_list.rgx.split(current_raw(input))
+
+current_list.rgx = re.compile(r'[^a-zA-Z0-9_\.]')
 
 def current_prefix(input):
     return current_list(input)[-1]
@@ -24,19 +42,20 @@ def prior(input):
 def lazy_imports(*args):
     query = ' '.join([x for x in args if x])
     matches = lazy_imports.rgx.findall(query)
+    
     for raw_module_name in matches:
-        if re.match('np(\..*)?$', raw_module_name):
-            module_name = re.sub('^np', 'numpy', raw_module_name)
-        elif re.match('pd(\..*)?$', raw_module_name):
-            module_name = re.sub('^pd', 'pandas', raw_module_name)
-        else:
-            module_name = raw_module_name
+        
+        module_name = raw_module_name
+        for rgx, alias in alias_res.items():
+            if rgx.match(module_name):
+                module_name = rgx.sub(alias.modname, module_name)
+        
         try:
             module = __import__(module_name)
-            globals()[raw_module_name] = module
-        except ImportError as exc:
-            assert exc
+        except ImportError:
             pass
+        else:
+            globals()[raw_module_name] = module
 
 lazy_imports.rgx = re.compile("([a-zA-Z_][a-zA-Z0-9_]*)\.?")
 
@@ -54,18 +73,20 @@ def complete_all(prefix, completion_args):
     completer = rlcompleter.Completer(context)
     idx = 0
     options_set = set()
+    
     while completer.complete(prefix, idx):
         options_set.add(completer.complete(prefix, idx))
         idx += 1
-
+    
     module_completion, module_list = get_completerlib()
     try:
         options = module_completion("import " + prefix) or []
-    except: #module_completion may throw exception (e.g. on 'import sqlalchemy_utils.')
+    except:
+        # module_completion may throw exception (e.g. on 'import sqlalchemy_utils.')
         options = []
     if options:
         options = [x.rstrip(' ') for x in options if x.startswith(prefix)]
-
+    
     return options + list(options_set)
 
 def parse_string(input):
@@ -82,7 +103,7 @@ def parse_string(input):
             if options:
                 options = [x.rstrip(' ') for x in options if x.startswith(current_prefix(input))]
         else:
-            options = complete_all(current_prefix(input), defaultdict(lambda: None))
+            options = complete_all(current_prefix(input), collections.defaultdict(lambda: None))
             if current_prefix(input).endswith('.'):
                 options = [x for x in options if '._' not in x]
         return options
@@ -94,7 +115,7 @@ def parse_string(input):
             options += 'l'
         return options
     else:
-        completion_args = defaultdict(lambda: None)
+        completion_args = collections.defaultdict(lambda: None)
         if '-x' in prior(input) or '-fx' in prior(input):
             completion_args['x_arg'] = True
         if '-l' in prior(input):
@@ -107,6 +128,9 @@ def parse_string(input):
         if current_prefix(input).endswith('.'):
             options = [x for x in options if '._' not in x]
         return options
+
+magic_run_re = re.compile(r'.*(\.ipy|\.ipynb|\.py[w]?)$')
+
 
 def get_completerlib():
     """Implementations for various useful completers.
@@ -129,29 +153,12 @@ def get_completerlib():
     import inspect
     import os
     
-    try:
-        # Python >= 3.3
-        from importlib.machinery import all_suffixes
-        _suffixes = all_suffixes()
-    except ImportError:
-        from imp import get_suffixes
-        _suffixes = [ s[0] for s in get_suffixes() ]
-    
     # Third-party imports
     from time import time
     from zipimport import zipimporter
     
     TIMEOUT_STORAGE = 2
     TIMEOUT_GIVEUP = 20
-    
-    # Regular expression for the python import statement
-    import_re = re.compile(r'(?P<name>[a-zA-Z_][a-zA-Z0-9_]*?)'
-                           r'(?P<package>[/\\]__init__)?'
-                           r'(?P<suffix>%s)$' %
-                           r'|'.join(re.escape(s) for s in _suffixes))
-    
-    # RE for the ipython %run command (python + ipython scripts)
-    magic_run_re = re.compile(r'.*(\.ipy|\.ipynb|\.py[w]?)$')
     
     def module_list(path):
         """
@@ -303,10 +310,10 @@ def get_completerlib():
     
     return module_completion, module_list
 
-def remove_trailing_paren(str_):
-    if str_.endswith('('):
-        return str_[:-1]
-    return str_
+def remove_trailing_paren(string):
+    if string.endswith('('):
+        return string[:-1]
+    return string
 
 def main():
     input = sys.argv[1:]
