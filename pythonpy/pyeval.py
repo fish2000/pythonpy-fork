@@ -40,23 +40,26 @@ alias_res   = { re.compile(rf"^{key}") : ModuleAlias(shorthand=key, modname=valu
                                                                     in module_aliases.items() }
 
 def import_matches(query, prefix=''):
-    matches = set(re.findall(r"(%s[a-zA-Z_][a-zA-Z0-9_]*)\.?" % prefix, query))
     
-    for raw_module_name in matches:
+    for raw_module_name in frozenset(
+                           re.findall(
+                           rf"({prefix}[a-zA-Z_][a-zA-Z0-9_]*)\.?", query)):
         
         module_name = raw_module_name
+        
         for rgx, alias in alias_res.items():
             if rgx.match(module_name):
-                module_name = re.sub(rf'^{alias.shorthand}', alias.modname, module_name)
+                module_name = rgx.sub(alias.modname, module_name)
         
         try:
             module = __import__(module_name)
+        
+        except (ModuleNotFoundError, ImportError):
+            pass
+        
+        else:
             globals()[raw_module_name] = module
             import_matches(query, prefix=f"{module_name}.")
-        
-        except (ModuleNotFoundError, ImportError) as exc:
-            assert exc
-            pass
 
 def lazy_imports(*args):
     query = ' '.join([x for x in args if x])
