@@ -3,12 +3,9 @@ from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
 import sys
 
-# if sys.version_info.major == 2:
-#     reload(sys)
-#     sys.setdefaultencoding('utf-8')
 from itertools import islice
-
 from signal import signal, SIGPIPE, SIG_DFL
+
 signal(SIGPIPE, SIG_DFL)
 
 import argparse
@@ -100,7 +97,42 @@ group.add_argument('--i', '--ignore_exceptions',
 group.add_argument('-V', '--version', action='version', version=__version_info__, help='version info')
 group.add_argument('-h', '--help', action='help', help="show this help message and exit")
 
+IOHandles = collections.namedtuple('IOHandles', ('out', 'err'))
+
+@contextlib.contextmanager
+def redirect(args):
+    """ Redirect “stdout” and “stderr” at the same time """
+    out, err = io.StringIO(), io.StringIO()
+    
+    with contextlib.ExitStack() as ctx:
+        ctx.enter_context(contextlib.redirect_stdout(out))
+        ctx.enter_context(contextlib.redirect_stderr(err))
+        iohandles = IOHandles(out=out, err=err)
+        
+        try:
+            yield iohandles
+        
+        except SystemExit as exit:
+            raise TypeError("[ERROR] in cluval execution") from exit
+        
+        except Exception as exc:
+            import traceback
+            pyheader = 'pythonpy/pyeval.py'
+            exprheader = 'File "<string>"'
+            foundexpr = False
+            lines = traceback.format_exception(*sys.exc_info())
+            for line in lines:
+                if pyheader in line:
+                    continue
+                iohandles.err.write(line)
+                if not foundexpr and line.lstrip().startswith(exprheader) and not isinstance(exc, SyntaxError):
+                    iohandles.err.write('    {}\n'.format(args.expression))
+                    foundexpr = True
+            
+            raise SystemExit(code=1)
+
 def pyeval(argv=None):
+    """ Evaluate a Python expression from a set of CLI arguments. """
     
     args = parser.parse_args(argv)
     
@@ -220,38 +252,3 @@ def pyeval(argv=None):
         out = iohandles.out.getvalue()
     
     return out
-
-IOHandles = collections.namedtuple('IOHandles', ('out', 'err'))
-
-@contextlib.contextmanager
-def redirect(args):
-    """ Redirect “stdout” and “stderr” at the same time """
-    out, err = io.StringIO(), io.StringIO()
-    
-    with contextlib.ExitStack() as ctx:
-        ctx.enter_context(contextlib.redirect_stdout(out))
-        ctx.enter_context(contextlib.redirect_stderr(err))
-        iohandles = IOHandles(out=out, err=err)
-        
-        try:
-            yield iohandles
-        
-        except SystemExit as exit:
-            raise TypeError("[ERROR] in cluval execution") from exit
-        
-        except Exception as exc:
-            import traceback
-            pyheader = 'pythonpy/pyeval.py'
-            exprheader = 'File "<string>"'
-            foundexpr = False
-            lines = traceback.format_exception(*sys.exc_info())
-            for line in lines:
-                if pyheader in line:
-                    continue
-                iohandles.err.write(line)
-                if not foundexpr and line.lstrip().startswith(exprheader) and not isinstance(exc, SyntaxError):
-                    iohandles.err.write('    {}\n'.format(args.expression))
-                    foundexpr = True
-            
-            # sys.exit(1)
-            raise SystemExit(code=1)
