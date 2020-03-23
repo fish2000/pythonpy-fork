@@ -3,6 +3,7 @@ from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
 
 import collections
+import inspect
 import rlcompleter
 import re, sys
     
@@ -131,6 +132,12 @@ def parse_string(input):
 
 # RE for the ipython %run command (python + ipython scripts)
 magic_run_re = re.compile(r'.*(\.ipy|\.ipynb|\.py[w]?)$')
+    
+def is_importable(module, attr, only_modules):
+    if only_modules:
+        return inspect.ismodule(getattr(module, attr))
+    else:
+        return not(attr[:2] == '__' and attr[-2:] == '__')
 
 def get_completerlib():
     """Implementations for various useful completers.
@@ -148,9 +155,6 @@ def get_completerlib():
     #-----------------------------------------------------------------------------
     # Imports
     #-----------------------------------------------------------------------------
-    #from __future__ import print_function
-    
-    import inspect
     import os
     
     # Third-party imports
@@ -243,18 +247,14 @@ def get_completerlib():
         rootmodules = list(set(rootmodules))
         return rootmodules
     
-    def is_importable(module, attr, only_modules):
-        if only_modules:
-            return inspect.ismodule(getattr(module, attr))
-        else:
-            return not(attr[:2] == '__' and attr[-2:] == '__')
-    
     def try_import(mod, only_modules=False):
         try:
             m = __import__(mod)
         except:
             return []
+        
         mods = mod.split('.')
+        
         for module in mods[1:]:
             m = getattr(m, module)
         
@@ -275,6 +275,7 @@ def get_completerlib():
         
         if '__init__' in completions:
             completions.remove('__init__')
+        
         return list(completions)
     
     def module_completion(line):
@@ -294,7 +295,7 @@ def get_completerlib():
             return ['import ']
         
         # 'from xy<tab>' or 'import xy<tab>'
-        if nwords < 3 and (words[0] in ['import','from']) :
+        if nwords < 3 and (words[0] in ['import', 'from']) :
             if nwords == 1:
                 return get_root_modules()
             mod = words[1].split('.')
