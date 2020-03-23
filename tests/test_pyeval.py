@@ -13,19 +13,8 @@ class TestPyEval(unittest.TestCase):
     def test_range(self):
         self.assertEqual(pyeval(['range(3)']), '0\n1\n2\n')
     
-    # def test_split_input(self):
-    #     self.assertEqual(pyeval(["""echo a,b | py -x 'x[1]' --si ,"""], shell=True), b'b\n')
-    
-    # def test_split_output(self):
-    #     self.assertEqual(pyeval(["""echo abc | py -x x --si '' --so ','"""], shell=True), b'a,b,c\n')
-    
-    # def test_ignore_errors(self):
-    #     self.assertEqual(pyeval("""echo a | py -x --i 'None.None'""", shell=True), b'')
-    #     self.assertEqual(pyeval("""echo a | py -fx --i 'None.None'""", shell=True), b'')
-    
     def test_statements(self):
         self.assertEqual(pyeval(['-c', 'a=5', '-C', 'print(a)']), '5\n')
-        # self.assertEqual(pyeval("""echo 3 | py -c 'a=5' -x x -C 'print(a)'""", shell=True), b'3\n5\n')
     
     def test_imports(self):
         module_commands = ["math.ceil(2.5)",
