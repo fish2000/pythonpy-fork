@@ -22,7 +22,7 @@ try:
             '__version__.py')).read(),
             '__version__.py', 'exec'))
 except:
-    __version__ = '0.5.1'
+    __version__ = '0.5.2'
 
 for e in endings:
     entry_points_scripts.append(py_entry % e)

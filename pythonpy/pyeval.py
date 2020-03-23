@@ -18,7 +18,7 @@ import sys, re, io
 try:
     from pythonpy.__version__ import __version__
 except (ImportError, ValueError, SystemError):
-    __version__ = '0.5.1'
+    __version__ = '0.5.2'
 
 pyversion = sys.version.split(' ')[0]
 __version_info__ = f'''Pythonpy {__version__}
