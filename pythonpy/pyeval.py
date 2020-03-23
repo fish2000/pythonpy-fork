@@ -27,6 +27,7 @@ module_aliases = {
     'mp'    : 'matplotlib',
     'np'    : 'numpy',
     'pd'    : 'pandas',
+    'tf'    : 'tensorflow',
     'xa'    : 'xarray'
 }
 
