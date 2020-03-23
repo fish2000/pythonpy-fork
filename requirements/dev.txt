@@ -1,0 +1,33 @@
+-r install.txt
+-r nox/tests.txt
+bpython>=0.18
+bumpversion>=0.5.3
+check-manifest>=0.40
+curtsies>=0.3.1
+gfm>=0.0.2
+ipython>=7.10.0
+jedi>=0.16.0
+nox>=2019.11.9
+numpy>=1.18.0
+parso>=0.6.1
+Pillow>=7.0.0
+prompt-toolkit>=3.0.3
+ptpython>=3.0.0
+python-dateutil>=2.8.0
+pytest>=5.3.0
+pytz>=2019.3
+readme-renderer>=24.0
+readme-renderer[md]
+requests>=2.20.0
+requests-toolbelt>=0.9.0
+setproctitle>=1.1.0
+termplotlib>=0.2.0
+termtables>=0.1.0
+tifffile>=2019.7.26
+twine>=3.1.0
+urllib3>=1.25.0
+yajl>=0.3.2
+yapf>=0.29.0
+yolk1977
+wcwidth>=0.1.8
+xerox>=0.4.0

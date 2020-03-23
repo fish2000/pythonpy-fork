@@ -1,16 +1,11 @@
 exclude *.pyc *~ *.so .DS_Store
 
 include .bumpversion.cfg
-include .coveragerc
 include .editorconfig
-include .gitchangelog.rc
 include .gitignore
-include .landscape.yml
 include .travis.yml
 include appveyor.yml
-include codecov.yml
 
-include ABOUT.md
 include CHANGELOG.md
 include CLASSIFIERS.txt
 include CODE_OF_CONDUCT.md
@@ -28,15 +23,12 @@ include pytest.ini
 include pytype.cfg
 include setup.cfg
 include setup.py
-include tox.ini
 
 recursive-include pythonpy *
 recursive-include requirements *.txt
 recursive-include tests *.py *.jpg *.png *.toml *.json
 
-exclude .coverage
 exclude .noxresults.json
-exclude coverage.xml
 
 recursive-exclude pythonpy *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store
