@@ -50,7 +50,7 @@ class TestPythonPy(unittest.TestCase):
                            "math",
                            "[math]",
                            "numpy.array([0, 2, 4, 6, 8], dtype='uint8')",
-                            "np.array([0, 2, 4, 6, 8], dtype='uint8')"
+                           "np.array([0, 2, 4, 6, 8], dtype='uint8')",
                            ]
         for command in module_commands:
             check_output("py %r" % command, shell=True)
