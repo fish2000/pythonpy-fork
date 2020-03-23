@@ -13,7 +13,7 @@ for e in endings:
 
 setup(
     name='pythonpy-fork',
-    version='0.5.0',
+    version='__version__ = '0.5.1'',
     description='python -c, with tab completion and shorthand; fish2k fork',
     license='MIT',
     url='https://github.com/fish2000/pythonpy-fork',
