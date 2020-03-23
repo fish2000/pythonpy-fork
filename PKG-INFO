@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: pythonpy-fork
+Version: 0.5.0
+Summary: python -c, with tab completion and shorthand; fish2k fork
+Home-page: https://github.com/fish2000/pythonpy-fork
+Author: Alexander Böhn
+Author-email: fish2000@gmail.com
+License: MIT
+Description: https://github.com/fish2000/pythonpy-fork
+Platform: UNKNOWN
