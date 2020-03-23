@@ -143,9 +143,9 @@ def redirect(args):
                     iohandles.err.write('    {}\n'.format(args.expression))
                     foundexpr = True
             
-            exc = SystemExit(iohandles.err.getvalue())
-            exc.code = 1
-            raise exc
+            sysexc = SystemExit(iohandles.err.getvalue())
+            sysexc.code = 1
+            raise sysexc
 
 def print_ok(string):
     try:
