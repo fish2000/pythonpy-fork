@@ -82,11 +82,12 @@ parser = argparse.ArgumentParser(
 
 group = parser.add_argument_group("Options")
 
-parser.add_argument('expression', nargs='?', default='None', help="e.g. py '2 ** 32'")
+parser.add_argument('expression', nargs='?', default='None',
+                    help="e.g. “py '2 ** 32'”")
 
 group.add_argument('-x', dest='lines_of_stdin', action='store_const',
                     const=True, default=False,
-                    help='treat each row of stdin as x')
+                    help='treat each row of stdin as “x”')
 
 group.add_argument('-fx', dest='filter_result', action='store_const',
                     const=True, default=False,
@@ -94,7 +95,7 @@ group.add_argument('-fx', dest='filter_result', action='store_const',
 
 group.add_argument('-l', dest='list_of_stdin', action='store_const',
                     const=True, default=False,
-                    help='treat list of stdin as l')
+                    help='treat list of stdin as “l”')
 
 group.add_argument('--ji', '--json_input',
                     dest='json_input', action='store_const',
@@ -119,8 +120,11 @@ group.add_argument('--i', '--ignore_exceptions',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
 
-group.add_argument('-V', '--version', action='version', version=__version_info__, help='version info')
-group.add_argument('-h', '--help', action='help', help="show this help message and exit")
+group.add_argument('-V', '--version', action='version', version=__version_info__,
+                   help='version info')
+
+group.add_argument('-h', '--help', action='help',
+                   help="show this help message and exit")
 
 @contextlib.contextmanager
 def redirect(args):
