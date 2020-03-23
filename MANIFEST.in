@@ -38,6 +38,6 @@ exclude .coverage
 exclude .noxresults.json
 exclude coverage.xml
 
-recursive-exclude clu *.pyc *~ *.so .DS_Store
+recursive-exclude pythonpy *.pyc *~ *.so .DS_Store
 recursive-exclude requirements *.pyc *~ *.so .DS_Store
 recursive-exclude tests *.pyc *~ *.so .DS_Store
