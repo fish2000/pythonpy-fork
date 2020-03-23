@@ -21,7 +21,7 @@ except (ImportError, ValueError, SystemError):
     __version__ = '0.5.2'
 
 pyversion = sys.version.split(' ')[0]
-__version_info__ = f'''Pythonpy {__version__}
+version_string = f'''Pythonpy {__version__}
 Python {pyversion}'''
 
 module_aliases = {
@@ -123,8 +123,9 @@ group.add_argument('--i', '--ignore_exceptions',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
 
-group.add_argument('-V', '--version', action='version', version=__version_info__,
-                   help='version info')
+group.add_argument('-V', '--version', action='version',
+                   version=version_string,
+                   help='show the current version and exit')
 
 group.add_argument('-h', '--help', action='help',
                    help="show this help message and exit")
