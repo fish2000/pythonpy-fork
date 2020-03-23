@@ -83,33 +83,42 @@ parser = argparse.ArgumentParser(
 group = parser.add_argument_group("Options")
 
 parser.add_argument('expression', nargs='?', default='None', help="e.g. py '2 ** 32'")
+
 group.add_argument('-x', dest='lines_of_stdin', action='store_const',
                     const=True, default=False,
                     help='treat each row of stdin as x')
+
 group.add_argument('-fx', dest='filter_result', action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
+
 group.add_argument('-l', dest='list_of_stdin', action='store_const',
                     const=True, default=False,
                     help='treat list of stdin as l')
+
 group.add_argument('--ji', '--json_input',
                     dest='json_input', action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
+
 group.add_argument('--jo', '--json_output',
                     dest='json_output', action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
+
 group.add_argument('--si', '--split_input', dest='input_delimiter',
                     help=argparse.SUPPRESS)
+
 group.add_argument('--so', '--split_output', dest='output_delimiter',
                     help=argparse.SUPPRESS)
+
 group.add_argument('-c', dest='pre_cmd', help='run code before expression')
 group.add_argument('-C', dest='post_cmd', help='run code after expression')
 group.add_argument('--i', '--ignore_exceptions',
                     dest='ignore_exceptions', action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
+
 group.add_argument('-V', '--version', action='version', version=__version_info__, help='version info')
 group.add_argument('-h', '--help', action='help', help="show this help message and exit")
 
