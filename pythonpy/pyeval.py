@@ -238,13 +238,13 @@ def pyeval(argv=None):
         
         elif args.list_of_stdin:
             
-            l = list(stdin)
+            locals()['l'] = list(stdin)
             result = eval(args.expression)
         
         else:
             result = eval(args.expression)
         
-        def format(output):
+        def prepare(output):
             if output is None:
                 return None
             elif args.json_output:
@@ -256,11 +256,11 @@ def pyeval(argv=None):
         
         if isinstance(result, collections.abc.Iterable) and not isinstance(result, str):
             for x in result:
-                formatted = format(x)
+                formatted = prepare(x)
                 if formatted is not None:
                     print_ok(formatted)
         else:
-            formatted = format(result)
+            formatted = prepare(result)
             if formatted is not None:
                 print_ok(formatted)
         

@@ -3,6 +3,9 @@ from subprocess import check_output
 
 class TestPythonPy(unittest.TestCase):
     
+    def test_list_stdin(self):
+        self.assertEqual(check_output("""echo $'a,2\nb,1' | py -l 'sorted(l, key=lambda x: x.split(",")[1])'""", shell=True), b'b,1\na,2\n')
+    
     def test_version(self):
         from pythonpy.__version__ import __version__
         import sys
