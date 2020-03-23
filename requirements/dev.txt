@@ -8,7 +8,6 @@ gfm>=0.0.2
 ipython>=7.10.0
 jedi>=0.16.0
 nox>=2019.11.9
-numpy>=1.18.0
 parso>=0.6.1
 Pillow>=7.0.0
 prompt-toolkit>=3.0.3

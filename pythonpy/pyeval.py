@@ -23,17 +23,28 @@ except (ImportError, ValueError, SystemError):
 __version_info__ = '''Pythonpy %s
 Python %s''' % (__version__, sys.version.split(' ')[0])
 
+module_aliases = {
+    'mp'    : 'matplotlib',
+    'np'    : 'numpy',
+    'pd'    : 'pandas',
+    'xa'    : 'xarray'
+}
+
+ModuleAlias = collections.namedtuple('ModuleAlias', ('shorthand', 'modname'))
+
+alias_res = { re.compile(rf"^{key}") : ModuleAlias(shorthand=key, modname=value) \
+                                                                        for key, value \
+                                                                         in module_aliases.items() }
+
 def import_matches(query, prefix=''):
     matches = set(re.findall(r"(%s[a-zA-Z_][a-zA-Z0-9_]*)\.?" % prefix, query))
     
     for raw_module_name in matches:
         
-        if re.match(r'np(\..*)?$', raw_module_name):
-            module_name = re.sub('^np', 'numpy', raw_module_name)
-        elif re.match(r'pd(\..*)?$', raw_module_name):
-            module_name = re.sub('^pd', 'pandas', raw_module_name)
-        else:
-            module_name = raw_module_name
+        module_name = raw_module_name
+        for rgx, alias in alias_res.items():
+            if rgx.match(module_name):
+                module_name = re.sub(rf'^{alias.shorthand}', alias.modname, module_name)
         
         try:
             module = __import__(module_name)
@@ -129,7 +140,9 @@ def redirect(args):
                     iohandles.err.write('    {}\n'.format(args.expression))
                     foundexpr = True
             
-            raise SystemExit(code=1)
+            exc = SystemExit(iohandles.err.getvalue())
+            exc.code = 1
+            raise exc
 
 def pyeval(argv=None):
     """ Evaluate a Python expression from a set of CLI arguments. """

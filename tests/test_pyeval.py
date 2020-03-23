@@ -33,6 +33,8 @@ class TestPyEval(unittest.TestCase):
                            "uuid.uuid1()",
                            "math",
                            "[math]",
+                           "numpy.array([0, 2, 4, 6, 8], dtype='uint8')",
+                           "np.array([0, 2, 4, 6, 8], dtype='uint8')"
                            ]
         for command in module_commands:
             assert pyeval([command])
