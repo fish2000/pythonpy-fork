@@ -1,30 +1,25 @@
 #!/usr/bin/env python2
 from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
-import sys
-import re
+
 from collections import defaultdict
 
 import rlcompleter
-
+import re, sys
 
 def current_raw(input):
     if len(input[-1]) > 0 and input[-1][0] in '"\'':
         return input[-1][1:] 
     return input[-1]
 
-
 def current_list(input):
     return re.split(r'[^a-zA-Z0-9_\.]', current_raw(input))
-
 
 def current_prefix(input):
     return current_list(input)[-1]
 
-
 def prior(input):
     return input[:-1]
-
 
 def lazy_imports(*args):
     query = ' '.join([x for x in args if x])
@@ -40,9 +35,9 @@ def lazy_imports(*args):
         try:
             module = __import__(module_name)
             globals()[raw_module_name] = module
-        except ImportError as e:
+        except ImportError as exc:
+            assert exc
             pass
-
 
 def complete_all(prefix, completion_args):
     lazy_imports(prefix, completion_args['c_arg'])
@@ -71,7 +66,6 @@ def complete_all(prefix, completion_args):
         options = [x.rstrip(' ') for x in options if x.startswith(prefix)]
 
     return options + list(options_set)
-
 
 def parse_string(input):
     if current_raw(input).startswith('--'):
@@ -113,10 +107,9 @@ def parse_string(input):
             options = [x for x in options if '._' not in x]
         return options
 
-
 def get_completerlib():
     """Implementations for various useful completers.
-
+    
     These are all loaded by default by IPython.
     """
     #-----------------------------------------------------------------------------
@@ -126,17 +119,15 @@ def get_completerlib():
     #
     #  The full license is in the file COPYING.txt, distributed with this software.
     #-----------------------------------------------------------------------------
-
+    
     #-----------------------------------------------------------------------------
     # Imports
     #-----------------------------------------------------------------------------
     #from __future__ import print_function
-
+    
     import inspect
     import os
-    #import re
-    #import sys
-
+    
     try:
         # Python >= 3.3
         from importlib.machinery import all_suffixes
@@ -144,24 +135,23 @@ def get_completerlib():
     except ImportError:
         from imp import get_suffixes
         _suffixes = [ s[0] for s in get_suffixes() ]
-
+    
     # Third-party imports
     from time import time
     from zipimport import zipimporter
-
+    
     TIMEOUT_STORAGE = 2
-
     TIMEOUT_GIVEUP = 20
-
+    
     # Regular expression for the python import statement
     import_re = re.compile(r'(?P<name>[a-zA-Z_][a-zA-Z0-9_]*?)'
                            r'(?P<package>[/\\]__init__)?'
                            r'(?P<suffix>%s)$' %
                            r'|'.join(re.escape(s) for s in _suffixes))
-
+    
     # RE for the ipython %run command (python + ipython scripts)
     magic_run_re = re.compile(r'.*(\.ipy|\.ipynb|\.py[w]?)$')
-
+    
     def module_list(path):
         """
         Return the list containing the names of the modules available in the given
@@ -170,10 +160,10 @@ def get_completerlib():
         # sys.path has the cwd as an empty string, but isdir/listdir need it as '.'
         if path == '':
             path = '.'
-
+        
         # A few local constants to be used in loops below
         pjoin = os.path.join
-
+        
         if os.path.isdir(path):
             # Build a list of all files in the directory and all files
             # in its subdirectories. For performance reasons, do not
@@ -186,13 +176,13 @@ def get_completerlib():
                     dirs[:] = [] # Do not recurse into additional subdirectories.
                 else:
                     files.extend(nondirs)
-
+        
         else:
             try:
                 files = list(zipimporter(path)._files.keys())
             except:
                 files = []
-
+        
         # Build a list of modules which match the import_re regex.
         modules = []
         for f in files:
@@ -200,13 +190,12 @@ def get_completerlib():
             if m:
                 modules.append(m.group('name'))
         return list(set(modules))
-
-
+    
     def get_root_modules():
         """
         Returns a list containing the names of all the modules available in the
         folders of the pythonpath.
-
+        
         ip.db['rootmodules_cache'] maps sys.path entries to list of modules.
         """
         #ip = get_ipython()
@@ -214,18 +203,22 @@ def get_completerlib():
         rootmodules_cache = {}
         rootmodules = list(sys.builtin_module_names)
         start_time = time()
-        #store = False
+        store = False
         for path in sys.path:
+            
             try:
                 modules = rootmodules_cache[path]
             except KeyError:
                 modules = module_list(path)
+                
                 try:
                     modules.remove('__init__')
                 except ValueError:
                     pass
+                
                 if path not in ('', '.'): # cwd modules should not be cached
                     rootmodules_cache[path] = modules
+                
                 if time() - start_time > TIMEOUT_STORAGE and not store:
                     #store = True
                     #print("\nCaching the list of root modules, please wait!")
@@ -235,20 +228,19 @@ def get_completerlib():
                 if time() - start_time > TIMEOUT_GIVEUP:
                     print("This is taking too long, we give up.\n")
                     return []
+            
             rootmodules.extend(modules)
         #if store:
             #ip.db['rootmodules_cache'] = rootmodules_cache
         rootmodules = list(set(rootmodules))
         return rootmodules
-
-
+    
     def is_importable(module, attr, only_modules):
         if only_modules:
             return inspect.ismodule(getattr(module, attr))
         else:
             return not(attr[:2] == '__' and attr[-2:] == '__')
-
-
+    
     def try_import(mod, only_modules=False):
         try:
             m = __import__(mod)
@@ -257,39 +249,42 @@ def get_completerlib():
         mods = mod.split('.')
         for module in mods[1:]:
             m = getattr(m, module)
-
+        
         m_is_init = hasattr(m, '__file__') and '__init__' in m.__file__
-
+        
         completions = []
+        
         if (not hasattr(m, '__file__')) or (not only_modules) or m_is_init:
             completions.extend( [attr for attr in dir(m) if
                                  is_importable(m, attr, only_modules)])
-
+        
         completions.extend(getattr(m, '__all__', []))
+        
         if m_is_init:
             completions.extend(module_list(os.path.dirname(m.__file__)))
+        
         completions = set(completions)
+        
         if '__init__' in completions:
             completions.remove('__init__')
         return list(completions)
-
-
+    
     def module_completion(line):
         """
         Returns a list containing the completion possibilities for an import line.
-
+        
         The line looks like this :
         'import xml.d'
         'from xml.dom import'
         """
-
+        
         words = line.split(' ')
         nwords = len(words)
-
+        
         # from whatever <tab> -> 'import '
         if nwords == 3 and words[0] == 'from':
             return ['import ']
-
+        
         # 'from xy<tab>' or 'import xy<tab>'
         if nwords < 3 and (words[0] in ['import','from']) :
             if nwords == 1:
@@ -299,20 +294,18 @@ def get_completerlib():
                 return get_root_modules()
             completion_list = try_import('.'.join(mod[:-1]), True)
             return ['.'.join(mod[:-1] + [el]) for el in completion_list]
-
+        
         # 'from xyz import abc<tab>'
         if nwords >= 3 and words[0] == 'from':
             mod = words[1]
             return try_import(mod)
-
+    
     return module_completion, module_list
-
 
 def remove_trailing_paren(str_):
     if str_.endswith('('):
         return str_[:-1]
     return str_
-
 
 def main():
     input = sys.argv[1:]
@@ -323,17 +316,16 @@ def main():
         return
     else:
         options = list(set(map(remove_trailing_paren, parse_string(input))))
-
+        
         if len(options) == 0:
             return
-
+        
         if len(current_list(input)) > 1 and max(map(len, options)) + 1 >= len(current_raw(input)):
             options.append(current_prefix(input))
-
+        
         if len(options) <= 1:
             options = options + [x + "'" for x in options]
         print(' '.join(options))
-
 
 if __name__ == '__main__':
     main()
