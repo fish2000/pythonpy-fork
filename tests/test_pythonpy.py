@@ -3,37 +3,40 @@ from subprocess import check_output
 
 class TestPythonPy(unittest.TestCase):
     
+    def checkOutput(self, string, result, **kwargs):
+        return self.assertEqual(check_output(string, **kwargs), result)
+    
     def test_list_stdin(self):
-        self.assertEqual(check_output("""echo $'a,2\nb,1' | py -l 'sorted(l, key=lambda x: x.split(",")[1])'""", shell=True), b'b,1\na,2\n')
+        self.checkOutput("""echo $'a,2\nb,1' | py -l 'sorted(l, key=lambda x: x.split(",")[1])'""", b'b,1\na,2\n', shell=True)
     
     def test_version(self):
         from pythonpy.__version__ import __version__
         import sys
         pyversion = sys.version.split(' ')[0]
-        self.assertEqual(check_output(['py', '--version']), bytes(f'''Pythonpy {__version__}\nPython {pyversion}\n''', encoding='UTF-8'))
+        self.checkOutput(['py', '--version'], bytes(f'''Pythonpy {__version__}\nPython {pyversion}\n''', encoding='UTF-8'))
     
     def test_empty(self):
-        self.assertEqual(check_output(['py']), b'')
+        self.checkOutput(['py'], b'')
     
     def test_numbers(self):
-        self.assertEqual(check_output(['py', '3 * 4.5']), b'13.5\n')
+        self.checkOutput(['py', '3 * 4.5'], b'13.5\n')
     
     def test_range(self):
-        self.assertEqual(check_output(['py', 'range(3)']), b'0\n1\n2\n')
+        self.checkOutput(['py', 'range(3)'], b'0\n1\n2\n')
     
     def test_split_input(self):
-        self.assertEqual(check_output(["""echo a,b | py -x 'x[1]' --si ,"""], shell=True), b'b\n')
+        self.checkOutput(["""echo a,b | py -x 'x[1]' --si ,"""], b'b\n', shell=True)
     
     def test_split_output(self):
-        self.assertEqual(check_output(["""echo abc | py -x x --si '' --so ','"""], shell=True), b'a,b,c\n')
+        self.checkOutput(["""echo abc | py -x x --si '' --so ','"""], b'a,b,c\n', shell=True)
     
     def test_ignore_errors(self):
-        self.assertEqual(check_output("""echo a | py -x --i 'None.None'""", shell=True), b'')
-        self.assertEqual(check_output("""echo a | py -fx --i 'None.None'""", shell=True), b'')
+        self.checkOutput("""echo a | py -x --i 'None.None'""", b'', shell=True)
+        self.checkOutput("""echo a | py -fx --i 'None.None'""", b'', shell=True)
     
     def test_statements(self):
-        self.assertEqual(check_output("""py -c 'a=5' -C 'print(a)'""", shell=True), b'5\n')
-        self.assertEqual(check_output("""echo 3 | py -c 'a=5' -x x -C 'print(a)'""", shell=True), b'3\n5\n')
+        self.checkOutput("""py -c 'a=5' -C 'print(a)'""", b'5\n', shell=True)
+        self.checkOutput("""echo 3 | py -c 'a=5' -x x -C 'print(a)'""", b'3\n5\n', shell=True)
     
     def test_imports(self):
         module_commands = ["math.ceil(2.5)",
