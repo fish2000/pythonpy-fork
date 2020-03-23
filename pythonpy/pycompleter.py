@@ -14,6 +14,7 @@ except ImportError:
     from imp import get_suffixes
     _suffixes = [ s[0] for s in get_suffixes() ]
 
+# Regular expressions for module aliases e.g. “np” -> “numpy”:
 from pythonpy.pyeval import alias_res
     
 # Regular expression for the python import statement
