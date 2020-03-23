@@ -16,6 +16,7 @@ include CLASSIFIERS.txt
 include CODE_OF_CONDUCT.md
 include COPYING.md
 include LICENSE.txt
+include PKG-INFO
 include README.rst
 
 include Makefile
