@@ -9,8 +9,8 @@ CWD = os.path.dirname(__file__)
 BASE_PATH = os.path.join(
             os.path.abspath(CWD), PROJECT_NAME)
 
-py_entry = 'ppy%s = pythonpy.__main__:main'
-pycompleter_entry = 'ppycompleter%s = pythonpy.pycompleter:main'
+py_entry = 'py%s = pythonpy.__main__:main'
+pycompleter_entry = 'pycompleter%s = pythonpy.pycompleter:main'
 endings = ('', sys.version[:1], sys.version[:3])
 entry_points_scripts = []
 
