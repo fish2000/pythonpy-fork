@@ -14,7 +14,6 @@ except ImportError:
     from imp import get_suffixes
     _suffixes = [ s[0] for s in get_suffixes() ]
 
-# RE for the ipython %run command (python + ipython scripts)
 from pythonpy.pyeval import alias_res
     
 # Regular expression for the python import statement
@@ -129,8 +128,8 @@ def parse_string(input):
             options = [x for x in options if '._' not in x]
         return options
 
+# RE for the ipython %run command (python + ipython scripts)
 magic_run_re = re.compile(r'.*(\.ipy|\.ipynb|\.py[w]?)$')
-
 
 def get_completerlib():
     """Implementations for various useful completers.
