@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
-import sys
 
 from itertools import islice
 from signal import signal, SIGPIPE, SIG_DFL
@@ -14,14 +13,16 @@ import collections.abc
 import contextlib
 import inspect
 import json
-import re, io
+import sys, re, io
 
 try:
-    from . import __version__
+    from pythonpy.__version__ import __version__
 except (ImportError, ValueError, SystemError):
     __version__ = '???'  # NOQA
-__version_info__ = '''Pythonpy %s
-Python %s''' % (__version__, sys.version.split(' ')[0])
+
+pyversion = sys.version.split(' ')[0]
+__version_info__ = f'''Pythonpy {__version__}
+Python {pyversion}'''
 
 module_aliases = {
     'mp'    : 'matplotlib',
@@ -32,10 +33,11 @@ module_aliases = {
 }
 
 ModuleAlias = collections.namedtuple('ModuleAlias', ('shorthand', 'modname'))
+IOHandles   = collections.namedtuple('IOHandles', ('out', 'err'))
 
-alias_res = { re.compile(rf"^{key}") : ModuleAlias(shorthand=key, modname=value) \
-                                                                        for key, value \
-                                                                         in module_aliases.items() }
+alias_res   = { re.compile(rf"^{key}") : ModuleAlias(shorthand=key, modname=value) \
+                                                                   for key, value \
+                                                                    in module_aliases.items() }
 
 def import_matches(query, prefix=''):
     matches = set(re.findall(r"(%s[a-zA-Z_][a-zA-Z0-9_]*)\.?" % prefix, query))
@@ -50,9 +52,9 @@ def import_matches(query, prefix=''):
         try:
             module = __import__(module_name)
             globals()[raw_module_name] = module
-            import_matches(query, prefix='%s.' % module_name)
+            import_matches(query, prefix=f"{module_name}.")
         
-        except ImportError as exc:
+        except (ModuleNotFoundError, ImportError) as exc:
             assert exc
             pass
 
@@ -109,8 +111,6 @@ group.add_argument('--i', '--ignore_exceptions',
 group.add_argument('-V', '--version', action='version', version=__version_info__, help='version info')
 group.add_argument('-h', '--help', action='help', help="show this help message and exit")
 
-IOHandles = collections.namedtuple('IOHandles', ('out', 'err'))
-
 @contextlib.contextmanager
 def redirect(args):
     """ Redirect “stdout” and “stderr” at the same time """
@@ -154,7 +154,9 @@ def pyeval(argv=None):
         
         if sum([args.list_of_stdin, args.lines_of_stdin, args.filter_result]) > 1:
             iohandles.err.write('Pythonpy accepts at most one of [-x, -l] flags\n')
-            raise SystemExit(code=1)
+            exc = SystemExit(iohandles.err.getvalue())
+            exc.code = 1
+            raise exc
         
         if args.json_input:
             
@@ -184,13 +186,13 @@ def pyeval(argv=None):
                 first_atom = current_list(args.expression.lstrip('?'))[0]
                 
                 if args.expression.startswith('??'):
-                    args.expression = "inspect_source(%s)" % first_atom
+                    args.expression = f"inspect_source({first_atom})"
                 elif args.expression.endswith('??'):
-                    args.expression = "inspect_source(%s)" % final_atom
+                    args.expression = f"inspect_source({final_atom})"
                 elif args.expression.startswith('?'):
-                    args.expression = 'help(%s)' % first_atom
+                    args.expression = f'help({first_atom})'
                 else:
-                    args.expression = 'help(%s)' % final_atom
+                    args.expression = f'help({final_atom})'
                 
                 if args.lines_of_stdin:
                     stdin = islice(stdin, 1)
@@ -244,7 +246,7 @@ def pyeval(argv=None):
             else:
                 return output
         
-        if isinstance(result, collections.abc.Iterable) and hasattr(result, '__iter__') and not isinstance(result, str):
+        if isinstance(result, collections.abc.Iterable) and not isinstance(result, str):
             for x in result:
                 formatted = format(x)
                 if formatted is not None:

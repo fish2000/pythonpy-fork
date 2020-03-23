@@ -3,6 +3,12 @@ from subprocess import check_output
 
 class TestPythonPy(unittest.TestCase):
     
+    def test_version(self):
+        from pythonpy.__version__ import __version__
+        import sys
+        pyversion = sys.version.split(' ')[0]
+        self.assertEqual(check_output(['py', '--version']), bytes(f'''Pythonpy {__version__}\nPython {pyversion}\n''', encoding='UTF-8'))
+    
     def test_empty(self):
         self.assertEqual(check_output(['py']), b'')
     
@@ -43,6 +49,8 @@ class TestPythonPy(unittest.TestCase):
                            "uuid.uuid1()",
                            "math",
                            "[math]",
+                           "numpy.array([0, 2, 4, 6, 8], dtype='uint8')",
+                            "np.array([0, 2, 4, 6, 8], dtype='uint8')"
                            ]
         for command in module_commands:
             check_output("py %r" % command, shell=True)
