@@ -228,15 +228,19 @@ def pyeval(argv=None):
                 elif args.expression.endswith('??'):
                     args.expression = f"inspect_source({final_atom})"
                 elif args.expression.startswith('?'):
-                    args.expression = f'help({first_atom})'
+                    args.expression = f'inspect.getdoc({first_atom})'
                 else:
-                    args.expression = f'help({final_atom})'
+                    args.expression = f'inspect.getdoc({final_atom})'
                 args.pager = True
                 
                 if args.lines_of_stdin:
                     stdin = islice(stdin, 1)
             
-            elif args.expression.startswith('help('):
+            if args.expression.startswith('help('):
+                args.pager = True
+            
+            if args.expression.endswith('…'):
+                args.expression = args.expression[:-1]
                 args.pager = True
         
         if args.pre_cmd:
