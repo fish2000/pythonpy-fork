@@ -86,59 +86,71 @@ group = parser.add_argument_group("Options")
 parser.add_argument('expression', nargs='?', default='None',
                     help="e.g. “py '2 ** 32'”")
 
-group.add_argument('-x', dest='lines_of_stdin', action='store_const',
+group.add_argument('-x', dest='lines_of_stdin',
+                    action='store_const',
                     const=True, default=False,
                     help='treat each row of stdin as “x”')
 
-group.add_argument('-fx', dest='filter_result', action='store_const',
+group.add_argument('-fx', dest='filter_result',
+                    action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
 
-group.add_argument('-l', dest='list_of_stdin', action='store_const',
+group.add_argument('-l', dest='list_of_stdin',
+                    action='store_const',
                     const=True, default=False,
                     help='treat list of stdin as “l”')
 
 group.add_argument('--ji', '--json_input',
-                    dest='json_input', action='store_const',
+                    dest='json_input',
+                    action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
 
 group.add_argument('--jo', '--json_output',
-                    dest='json_output', action='store_const',
+                    dest='json_output',
+                    action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
 
-group.add_argument('--si', '--split_input', dest='input_delimiter',
+group.add_argument('--si', '--split_input',
+                    dest='input_delimiter',
                     help=argparse.SUPPRESS)
 
-group.add_argument('--so', '--split_output', dest='output_delimiter',
+group.add_argument('--so', '--split_output',
+                    dest='output_delimiter',
                     help=argparse.SUPPRESS)
 
-group.add_argument('-p', '--pager', dest='pager',
-                   action='store_const',
-                   const=True, default=False,
-                   help=argparse.SUPPRESS)
+group.add_argument('-p', '--pager',
+                    dest='pager',
+                    action='store_const',
+                    const=True, default=False,
+                    help=argparse.SUPPRESS)
 
 group.add_argument('-c', dest='pre_cmd', help='run code before expression')
 group.add_argument('-C', dest='post_cmd', help='run code after expression')
 
 group.add_argument('--i', '--ignore_exceptions',
-                    dest='ignore_exceptions', action='store_const',
+                    dest='ignore_exceptions',
+                    action='store_const',
                     const=True, default=False,
                     help=argparse.SUPPRESS)
 
+group.add_argument('-v', '--verbose',
+                    dest='verbosity',
+                    action='count', default=0,
+                    help='set the verbosity level (default=0)')
+
 group.add_argument('-V', '--version', action='version',
-                   version=version_string,
-                   help='show the current version and exit')
+                    version=version_string,
+                    help='show the current version and exit')
 
 group.add_argument('-h', '--help', action='help',
-                   help="show this help message and exit")
+                    help="show this help message and exit")
 
-def exit(*args, code=0, **kwargs):
+def exit(*args, **kwargs):
     """ Craft and return (without raising!) a SystemExit exception """
-    exc = SystemExit(*args)
-    if code:
-        exc.code = code
+    exc = SystemExit("\n\t".join(args))
     return exc
 
 @contextlib.contextmanager
@@ -155,7 +167,7 @@ def redirect(args):
             yield iohandles
         
         except SystemExit as exc:
-            raise TypeError("[ERROR] in cluval execution") from exc
+            raise exit("[ERROR] in cluval execution:", str(exc))
         
         except BaseException as exc:
             import traceback
@@ -171,14 +183,8 @@ def redirect(args):
                     iohandles.err.write('    {}\n'.format(args.expression))
                     foundexpr = True
             
-            raise exit(iohandles.err.getvalue(), code=1)
+            raise exit(iohandles.err.getvalue())
 
-def print_ok(string):
-    try:
-        print(string)
-    except UnicodeEncodeError:
-        print(string.encode('UTF-8'))
-        
 def safe_eval(code, x):
     try:
         return eval(code)
@@ -193,8 +199,7 @@ def pyeval(argv=None):
     with redirect(args) as iohandles:
         
         if sum([args.list_of_stdin, args.lines_of_stdin, args.filter_result]) > 1:
-            iohandles.err.write('Pythonpy accepts at most one of [-x, -l] flags\n')
-            raise exit(iohandles.err.getvalue(), code=1)
+            raise exit('Pythonpy accepts at most one of [-x, -l] flags\n')
         
         if args.json_input:
             
@@ -291,11 +296,11 @@ def pyeval(argv=None):
             for x in result:
                 formatted = prepare(x)
                 if formatted is not None:
-                    print_ok(formatted)
+                    iohandles.out.write(f"{formatted}\n")
         else:
             formatted = prepare(result)
             if formatted is not None:
-                print_ok(formatted)
+                iohandles.out.write(f"{formatted}\n")
         
         if args.post_cmd:
             exec(args.post_cmd)
