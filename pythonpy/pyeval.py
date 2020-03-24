@@ -274,7 +274,8 @@ def pyeval(argv=None):
             else:
                 return output
         
-        if isinstance(result, collections.abc.Iterable) and not isinstance(result, (str, bytes)):
+        if isinstance(result, collections.abc.Iterable) and not \
+           isinstance(result, (str, bytes)):
             for x in result:
                 formatted = prepare(x)
                 if formatted is not None:
