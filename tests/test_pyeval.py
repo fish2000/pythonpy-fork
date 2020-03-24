@@ -4,20 +4,23 @@ from pythonpy.pyeval import pyeval
 
 class TestPyEval(unittest.TestCase):
     
+    def pyeval(self, args, result):
+        return self.assertEqual(pyeval(args), result)
+    
     def test_empty(self):
-        self.assertEqual(pyeval([]), '')
+        self.pyeval([], '')
     
     def test_numbers(self):
-        self.assertEqual(pyeval(['3 * 4.5']), '13.5\n')
+        self.pyeval(['3 * 4.5'], '13.5\n')
     
     def test_range(self):
-        self.assertEqual(pyeval(['range(3)']), '0\n1\n2\n')
+        self.pyeval(['range(3)'], '0\n1\n2\n')
     
     def test_bytes(self):
-        self.assertEqual(pyeval(['b"Yo dogg"']), "b'Yo dogg'\n")
+        self.pyeval(['b"Yo dogg"'], "b'Yo dogg'\n")
     
     def test_statements(self):
-        self.assertEqual(pyeval(['-c', 'a=5', '-C', 'print(a)']), '5\n')
+        self.pyeval(['-c', 'a=5', '-C', 'print(a)'], '5\n')
     
     def test_imports(self):
         module_commands = [
