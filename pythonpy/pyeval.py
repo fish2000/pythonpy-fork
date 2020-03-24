@@ -184,7 +184,7 @@ def safe_eval(code, x):
 def pyeval(argv=None):
     """ Evaluate a Python expression from a set of CLI arguments. """
     
-    args = parser.parse_args(argv)
+    args = parser.parse_args(argv or sys.argv[1:])
     
     with redirect(args) as iohandles:
         
@@ -291,3 +291,9 @@ def pyeval(argv=None):
         out = iohandles.out.getvalue()
     
     return out
+
+def main():
+    print(pyeval(), end='')
+
+if __name__ == '__main__':
+    main()
