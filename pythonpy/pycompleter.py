@@ -16,7 +16,7 @@ except ImportError:
     _suffixes = [ s[0] for s in get_suffixes() ]
 
 # Regular expressions for module aliases e.g. “np” -> “numpy”:
-from pythonpy.pyeval import alias_res
+from pythonpy.pyeval import aliases
     
 # Regular expression for the python import statement
 import_re = re.compile(r'(?P<name>[a-zA-Z_][a-zA-Z0-9_]*?)'
@@ -47,7 +47,7 @@ def lazy_imports(*args):
     for raw_module_name in matches:
         
         module_name = raw_module_name
-        for rgx, alias in alias_res.items():
+        for rgx, alias in aliases.items():
             if rgx.match(module_name):
                 module_name = rgx.sub(alias.modname, module_name)
         

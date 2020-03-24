@@ -2,7 +2,8 @@
 from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
 
-from itertools import islice
+from functools import lru_cache
+from itertools import count, islice
 from signal import signal, SIGPIPE, SIG_DFL
 
 signal(SIGPIPE, SIG_DFL)
@@ -15,6 +16,8 @@ import inspect
 import json
 import pydoc
 import sys, re, io
+
+cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
 try:
     from pythonpy.__version__ import __version__
@@ -36,10 +39,26 @@ module_aliases = {
 ModuleAlias = collections.namedtuple('ModuleAlias', ('shorthand', 'modname'))
 IOHandles   = collections.namedtuple('IOHandles', ('out', 'err'))
 
-alias_res   = { re.compile(rf"^{key}") : ModuleAlias(shorthand=key, modname=value) \
+aliases     = { re.compile(rf"^{key}") : ModuleAlias(shorthand=key, modname=value) \
                                                                    for key, value \
                                                                     in module_aliases.items() }
 
+def iterlen(iterable):
+    """ iterlen(iterable) → Return the number of items in “iterable.”
+        
+        This will consume iterables without a “__len__()” method – be careful!
+    """
+    # Stolen from “more-itertools”: http://bit.ly/2LUZqCx
+    try:
+        return len(iterable)
+    except TypeError as exc:
+        if 'has no len' in str(exc):
+            counter = count()
+            collections.deque(zip(iterable, counter), maxlen=0)
+            return next(counter)
+        raise
+
+@cache
 def import_matches(query, prefix=''):
     
     for raw_module_name in frozenset(
@@ -48,9 +67,11 @@ def import_matches(query, prefix=''):
         
         module_name = raw_module_name
         
-        for rgx, alias in alias_res.items():
-            if rgx.match(module_name):
-                module_name = rgx.sub(alias.modname, module_name)
+        # Only de-alias module names at the top level:
+        if prefix == '':
+            for rgx, alias in aliases.items():
+                if rgx.match(module_name):
+                    module_name = rgx.sub(alias.modname, module_name)
         
         try:
             module = __import__(module_name)
@@ -60,11 +81,12 @@ def import_matches(query, prefix=''):
         
         else:
             globals()[raw_module_name] = module
-            import_matches(query, prefix=f"{module_name}.")
+            yield module
+            yield from import_matches(query, prefix=f"{module_name}.")
 
 def lazy_imports(*args):
-    query = ' '.join([x for x in args if x])
-    import_matches(query)
+    query = ' '.join(x for x in args if x)
+    yield from import_matches(query)
 
 def current_list(input):
     return current_list.rgx.split(input)
@@ -255,7 +277,9 @@ def pyeval(argv=None):
             args.post_cmd = args.post_cmd.replace("`", "'")
         
         # DO THE IMPORTS:
-        lazy_imports(args.expression, args.pre_cmd, args.post_cmd)
+        modules = tuple(lazy_imports(args.expression,
+                                     args.pre_cmd,
+                                     args.post_cmd))
         
         if args.pre_cmd:
             exec(args.pre_cmd)
