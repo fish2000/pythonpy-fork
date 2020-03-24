@@ -130,6 +130,13 @@ group.add_argument('-V', '--version', action='version',
 group.add_argument('-h', '--help', action='help',
                    help="show this help message and exit")
 
+def exit(*args, code=0, **kwargs):
+    """ Craft and return (without raising!) a SystemExit exception """
+    exc = SystemExit(*args)
+    if code:
+        exc.code = code
+    return exc
+
 @contextlib.contextmanager
 def redirect(args):
     """ Redirect “stdout” and “stderr” at the same time """
@@ -160,9 +167,7 @@ def redirect(args):
                     iohandles.err.write('    {}\n'.format(args.expression))
                     foundexpr = True
             
-            sysexc = SystemExit(iohandles.err.getvalue())
-            sysexc.code = 1
-            raise sysexc
+            raise exit(iohandles.err.getvalue(), code=1)
 
 def print_ok(string):
     try:
@@ -185,9 +190,7 @@ def pyeval(argv=None):
         
         if sum([args.list_of_stdin, args.lines_of_stdin, args.filter_result]) > 1:
             iohandles.err.write('Pythonpy accepts at most one of [-x, -l] flags\n')
-            exc = SystemExit(iohandles.err.getvalue())
-            exc.code = 1
-            raise exc
+            raise exit(iohandles.err.getvalue(), code=1)
         
         if args.json_input:
             
