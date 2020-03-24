@@ -86,7 +86,7 @@ def import_matches(query, prefix=''):
             if module_name != raw_module_name:
                 globals()[module_name] = module
             yield module
-            yield from import_matches(query, prefix=f"{module_name}.")
+            yield from import_matches(query, prefix=rf"{module_name}\.")
 
 def lazy_imports(*args):
     query = ' '.join(x for x in args if x)
