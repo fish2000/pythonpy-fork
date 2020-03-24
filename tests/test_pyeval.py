@@ -13,6 +13,9 @@ class TestPyEval(unittest.TestCase):
     def test_range(self):
         self.assertEqual(pyeval(['range(3)']), '0\n1\n2\n')
     
+    def test_bytes(self):
+        self.assertEqual(pyeval(['b"Yo dogg"']), "b'Yo dogg'\n")
+    
     def test_statements(self):
         self.assertEqual(pyeval(['-c', 'a=5', '-C', 'print(a)']), '5\n')
     
@@ -39,7 +42,6 @@ class TestPyEval(unittest.TestCase):
         ]
         for command in module_commands:
             assert pyeval([command])
-
 
 if __name__ == '__main__':
     unittest.main()
