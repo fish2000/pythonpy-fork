@@ -61,6 +61,5 @@ class TestPythonPy(unittest.TestCase):
         for command in module_commands:
             check_output("py %r" % command, shell=True)
 
-
 if __name__ == '__main__':
     unittest.main()
