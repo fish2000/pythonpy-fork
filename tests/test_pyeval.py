@@ -5,7 +5,7 @@ from pythonpy.pyeval import pyeval
 class TestPyEval(unittest.TestCase):
     
     def pyeval(self, args, result):
-        return self.assertEqual(pyeval(args), result)
+        return self.assertEqual(pyeval(args)[0], result)
     
     def test_empty(self):
         self.pyeval([], '')
@@ -44,7 +44,7 @@ class TestPyEval(unittest.TestCase):
             "np.array([0, 2, 4, 6, 8], dtype='uint8')"
         ]
         for command in module_commands:
-            assert pyeval([command])
+            assert pyeval([command])[0]
 
 if __name__ == '__main__':
     unittest.main()

@@ -13,6 +13,7 @@ import collections.abc
 import contextlib
 import inspect
 import json
+import pydoc
 import sys, re, io
 
 try:
@@ -70,14 +71,11 @@ def current_list(input):
 
 current_list.rgx = re.compile(r'[^a-zA-Z0-9_\.]')
 
-def inspect_source(obj):
-    import pydoc
-    
+def inspect_source(instance):
     try:
-        pydoc.pager(''.join(inspect.getsourcelines(obj)[0]))
-        return None
+        return ''.join(inspect.getsourcelines(instance)[0])
     except:
-        return help(obj)
+        return help(instance)
 
 parser = argparse.ArgumentParser(
             formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -116,8 +114,14 @@ group.add_argument('--si', '--split_input', dest='input_delimiter',
 group.add_argument('--so', '--split_output', dest='output_delimiter',
                     help=argparse.SUPPRESS)
 
+group.add_argument('-p', '--pager', dest='pager',
+                   action='store_const',
+                   const=True, default=False,
+                   help=argparse.SUPPRESS)
+
 group.add_argument('-c', dest='pre_cmd', help='run code before expression')
 group.add_argument('-C', dest='post_cmd', help='run code after expression')
+
 group.add_argument('--i', '--ignore_exceptions',
                     dest='ignore_exceptions', action='store_const',
                     const=True, default=False,
@@ -150,8 +154,8 @@ def redirect(args):
         try:
             yield iohandles
         
-        except SystemExit as exit:
-            raise TypeError("[ERROR] in cluval execution") from exit
+        except SystemExit as exc:
+            raise TypeError("[ERROR] in cluval execution") from exc
         
         except BaseException as exc:
             import traceback
@@ -227,9 +231,13 @@ def pyeval(argv=None):
                     args.expression = f'help({first_atom})'
                 else:
                     args.expression = f'help({final_atom})'
+                args.pager = True
                 
                 if args.lines_of_stdin:
                     stdin = islice(stdin, 1)
+            
+            elif args.expression.startswith('help('):
+                args.pager = True
         
         if args.pre_cmd:
             args.pre_cmd = args.pre_cmd.replace("`", "'")
@@ -288,12 +296,20 @@ def pyeval(argv=None):
         if args.post_cmd:
             exec(args.post_cmd)
         
-        out = iohandles.out.getvalue()
+        sys.stdout.flush()
     
-    return out
+    # Extract rerouted «stdout» value:
+    out = iohandles.out.getvalue()
+    
+    # Return extracted «stdout» and whether or not to page:
+    return out, args.pager
 
 def main():
-    print(pyeval(), end='')
+    out, pager = pyeval()
+    if pager:
+        pydoc.pager(out)
+    else:
+        print(out, end='')
 
 if __name__ == '__main__':
     main()
