@@ -81,6 +81,8 @@ def import_matches(query, prefix=''):
         
         else:
             globals()[raw_module_name] = module
+            if module_name != raw_module_name:
+                globals()[module_name] = module
             yield module
             yield from import_matches(query, prefix=f"{module_name}.")
 
