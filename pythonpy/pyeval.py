@@ -218,6 +218,10 @@ def pyeval(argv=None):
         if args.expression:
             args.expression = args.expression.replace("`", "'")
             
+            if args.expression.endswith('…'):
+                args.expression = args.expression[:-1]
+                args.pager = True
+            
             if args.expression.startswith('?') or args.expression.endswith('?'):
                 
                 final_atom = current_list(args.expression.rstrip('?'))[-1]
@@ -237,10 +241,6 @@ def pyeval(argv=None):
                     stdin = islice(stdin, 1)
             
             if args.expression.startswith('help('):
-                args.pager = True
-            
-            if args.expression.endswith('…'):
-                args.expression = args.expression[:-1]
                 args.pager = True
         
         if args.pre_cmd:
