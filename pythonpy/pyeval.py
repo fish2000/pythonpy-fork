@@ -67,11 +67,13 @@ def import_matches(query, prefix=''):
         
         module_name = raw_module_name
         
-        # Only de-alias module names at the top level:
+        # Only de-alias module names at the top level,
+        # and at most de-alias once:
         if prefix == '':
             for rgx, alias in aliases.items():
                 if rgx.match(module_name):
                     module_name = rgx.sub(alias.modname, module_name)
+                    break
         
         try:
             module = __import__(module_name)
