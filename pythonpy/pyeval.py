@@ -254,6 +254,7 @@ def pyeval(argv=None):
         if args.post_cmd:
             args.post_cmd = args.post_cmd.replace("`", "'")
         
+        # DO THE IMPORTS:
         lazy_imports(args.expression, args.pre_cmd, args.post_cmd)
         
         if args.pre_cmd:
