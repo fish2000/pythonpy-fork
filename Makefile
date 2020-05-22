@@ -21,7 +21,7 @@ clean-pyc:
 clean-build-artifacts:
 	rm -rf build dist $(PROJECT_NAME)_fork.egg-info
 
-clean-test-artifacts: clean-pyc
+clean-test-artifacts:
 	rm -rf  $(PROJECT_ROOT)/.pytest_cache \
 			$(PROJECT_ROOT)/.hypothesis \
 			$(PROJECT_BASE)/.pytest_cache \
