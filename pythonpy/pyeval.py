@@ -12,6 +12,7 @@ import argparse
 import collections
 import collections.abc
 import contextlib
+import importlib
 import inspect
 import json
 import pydoc
@@ -76,7 +77,7 @@ def import_matches(query, prefix=''):
                     break
         
         try:
-            module = __import__(module_name)
+            module = importlib.import_module(module_name)
         
         except (ModuleNotFoundError, ImportError):
             pass
