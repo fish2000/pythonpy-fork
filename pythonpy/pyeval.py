@@ -17,6 +17,17 @@ import inspect
 import json
 import pydoc
 import sys, re, io
+import os, site
+
+if 'VIRTUAL_ENV' in os.environ:
+    # derived from activate_this.py from the virtualenv package
+    base = os.environ['VIRTUAL_ENV']
+    os.environ['PATH'] = os.pathsep.join([os.path.join(base, 'bin')] + os.environ['PATH'].split(os.pathsep))
+    prev_length = len(sys.path)
+    site.addsitedir(os.path.realpath(site._get_path(base)))
+    sys.path[:] = sys.path[prev_length:] + sys.path[0:prev_length]
+    sys.prefix = base
+sys.path.insert(0, '')
 
 cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 
