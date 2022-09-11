@@ -1,7 +1,7 @@
 -r install.txt
 -r nox/tests.txt
 bpython>=0.18
-bumpversion>=0.5.3
+bump2version>=1.0.0
 check-manifest>=0.40
 curtsies>=0.3.1
 gfm>=0.0.2
@@ -25,7 +25,7 @@ termtables>=0.1.0
 tifffile>=2019.7.26
 twine>=3.1.0
 urllib3>=1.25.0
-yajl>=0.3.2
+# yajl>=0.3.2
 yapf>=0.29.0
 yolk1977
 wcwidth>=0.1.8
