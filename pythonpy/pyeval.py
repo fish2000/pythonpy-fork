@@ -297,6 +297,13 @@ def pyeval(argv=None):
                                      args.pre_cmd,
                                      args.post_cmd))
         
+        # Print a list of any imported modules
+        if args.verbosity and len(modules):
+            from pprint import pprint
+            print("Imported modules:")
+            pprint(modules)
+            print()
+        
         if args.pre_cmd:
             exec(args.pre_cmd)
         
