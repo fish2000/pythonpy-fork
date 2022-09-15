@@ -3,6 +3,7 @@ from __future__ import (unicode_literals, absolute_import,
                         print_function, division)
 
 import collections
+import importlib
 import inspect
 import rlcompleter
 import re, sys
@@ -52,7 +53,7 @@ def lazy_imports(*args):
                 module_name = rgx.sub(alias.modname, module_name)
         
         try:
-            module = __import__(module_name)
+            module = importlib.import_module(module_name)
         except ImportError:
             pass
         else:
@@ -249,7 +250,7 @@ def get_completerlib():
     
     def try_import(mod, only_modules=False):
         try:
-            m = __import__(mod)
+            m = importlib.import_module(mod)
         except:
             return []
         
