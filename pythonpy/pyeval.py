@@ -34,7 +34,7 @@ cache = lambda function: lru_cache(maxsize=128, typed=True)(function)
 try:
     from pythonpy.__version__ import __version__
 except (ImportError, ValueError, SystemError):
-    __version__ = '0.5.4'
+    __version__ = '0.5.5'
 
 pyversion = sys.version.split(' ')[0]
 version_string = f'''Pythonpy {__version__}
