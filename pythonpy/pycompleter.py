@@ -54,7 +54,7 @@ def lazy_imports(*args):
         
         try:
             module = importlib.import_module(module_name)
-        except ImportError:
+        except (ImportError, ModuleNotFoundError):
             pass
         else:
             globals()[raw_module_name] = module
